@@ -581,7 +581,11 @@ export const useDataStore = create<DataState>((set, get) => ({
         };
 
         if (payload.eventType === 'INSERT') {
-          set(s => ({ transactions: [enriched, ...s.transactions] }));
+          // 내가 직접 추가한 경우 이미 로컬에 있음 → 중복 방지
+          set(s => s.transactions.some(t => t.id === enriched.id)
+            ? s
+            : { transactions: [enriched, ...s.transactions] }
+          );
         } else {
           set(s => ({ transactions: s.transactions.map(t => t.id === txId ? enriched : t) }));
         }
@@ -608,7 +612,10 @@ export const useDataStore = create<DataState>((set, get) => ({
         if (!data.is_active) {
           set(s => ({ accounts: s.accounts.filter(a => a.id !== data.id) }));
         } else if (payload.eventType === 'INSERT') {
-          set(s => ({ accounts: [...s.accounts, data] }));
+          set(s => s.accounts.some(a => a.id === data.id)
+            ? s
+            : { accounts: [...s.accounts, data] }
+          );
         } else {
           set(s => ({ accounts: s.accounts.map(a => a.id === data.id ? data : a) }));
         }
@@ -635,7 +642,10 @@ export const useDataStore = create<DataState>((set, get) => ({
         if (!data.is_active) {
           set(s => ({ cards: s.cards.filter(c => c.id !== data.id) }));
         } else if (payload.eventType === 'INSERT') {
-          set(s => ({ cards: [...s.cards, data] }));
+          set(s => s.cards.some(c => c.id === data.id)
+            ? s
+            : { cards: [...s.cards, data] }
+          );
         } else {
           set(s => ({ cards: s.cards.map(c => c.id === data.id ? data : c) }));
         }
