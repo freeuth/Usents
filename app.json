@@ -1,12 +1,16 @@
 {
   "expo": {
-    "name": "usents",
+    "name": "Usents",
     "slug": "usents",
     "version": "1.0.0",
     "orientation": "portrait",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/3ef61929-f17a-4cbd-86fe-994f69fe5e97"
+    },
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -25,6 +29,17 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-font",
+      "@react-native-community/datetimepicker"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3ef61929-f17a-4cbd-86fe-994f69fe5e97"
+      }
+    },
+    "owner": "freeuth"
   }
 }
