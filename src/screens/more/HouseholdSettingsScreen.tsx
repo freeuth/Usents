@@ -39,10 +39,12 @@ export function HouseholdSettingsScreen({ navigation }: any) {
     }
   };
 
+  const EXPO_DEEP_LINK = 'exp://u.expo.dev/3ef61929-f17a-4cbd-86fe-994f69fe5e97?channel-name=main&runtime-version=1.0.0';
+
   const handleShareCode = () => {
     if (!household?.invite_code) return;
     Share.share({
-      message: `Usents 가계부 앱에 초대합니다!\n초대 코드: ${household.invite_code}\n\n앱 다운로드 후 로그인 → "기존 가구 참여" → 코드 입력`,
+      message: `[Usents 가계부] 같이 써요! 💰\n\n① Expo Go 설치 (App Store)\n② 아래 링크로 앱 열기\n${EXPO_DEEP_LINK}\n\n③ 회원가입 후 "참여하기" 선택\n④ 초대 코드 입력: ${household.invite_code}`,
       title: 'Usents 초대',
     });
   };
