@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { useDataStore } from '../../stores/dataStore';
 import { useFilterStore } from '../../stores/filterStore';
 import { CARD_TYPE_LABELS } from '../../constants/categories';
@@ -19,6 +20,7 @@ const CARD_TYPES: { key: CardType; label: string }[] = [
 const OWNERS: Owner[] = ['me', 'spouse', 'joint'];
 
 export function CardDetailScreen({ route, navigation }: any) {
+  const ownerLabels = useOwnerLabels();
   const { cardId } = route.params;
   const { cards, accounts, updateCard, deleteCard, getCardForecast } = useDataStore();
   const { selectedMonth } = useFilterStore();
@@ -112,7 +114,7 @@ export function CardDetailScreen({ route, navigation }: any) {
               </View>
               <View style={[styles.ownerBadge, { backgroundColor: OwnerColors[card.owner] + '20' }]}>
                 <Text style={[styles.ownerBadgeText, { color: OwnerColors[card.owner] }]}>
-                  {OwnerLabels[card.owner]}
+                  {ownerLabels[card.owner]}
                 </Text>
               </View>
             </View>
@@ -192,7 +194,7 @@ export function CardDetailScreen({ route, navigation }: any) {
                       onPress={() => setOwner(o)}
                     >
                       <Text style={[styles.chipText, owner === o && { color: OwnerColors[o] }]}>
-                        {OwnerLabels[o]}
+                        {ownerLabels[o]}
                       </Text>
                     </TouchableOpacity>
                   ))}

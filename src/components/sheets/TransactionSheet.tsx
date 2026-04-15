@@ -6,7 +6,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
@@ -29,6 +30,7 @@ const PAYMENT_TYPES: { key: PaymentMethodType; label: string }[] = [
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export function TransactionSheet({ visible, onClose, onSuccess }: TransactionSheetProps) {
+  const ownerLabels = useOwnerLabels();
   const { household, member } = useAuthStore();
   const { accounts, cards, categories, loadCategories, loadAccounts, loadCards, createTransaction } = useDataStore();
 
@@ -210,7 +212,7 @@ export function TransactionSheet({ visible, onClose, onSuccess }: TransactionShe
                   onPress={() => setOwner(o)}
                 >
                   <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>
-                    {OwnerLabels[o]}
+                    {ownerLabels[o]}
                   </Text>
                 </TouchableOpacity>
               ))}

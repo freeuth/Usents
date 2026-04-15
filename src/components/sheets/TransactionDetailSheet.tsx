@@ -6,7 +6,8 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { useDataStore } from '../../stores/dataStore';
 import { useAuthStore } from '../../stores/authStore';
 import { formatCurrency } from '../../lib/helpers';
@@ -42,6 +43,7 @@ function formatDateLabel(dateStr: string) {
 }
 
 export function TransactionDetailSheet({ transaction: tx, visible, onClose }: Props) {
+  const ownerLabels = useOwnerLabels();
   const { household } = useAuthStore();
   const { categories, accounts, cards,
     loadCategories, loadAccounts, loadCards,
@@ -208,7 +210,7 @@ export function TransactionDetailSheet({ transaction: tx, visible, onClose }: Pr
                 {[
                   { icon: 'label' as const,          label: '카테고리', value: category?.name ?? '-' },
                   { icon: 'calendar-today' as const, label: '날짜',     value: formatDateLabel(tx.date) },
-                  { icon: 'person' as const,         label: '대상',     value: OwnerLabels[tx.owner] },
+                  { icon: 'person' as const,         label: '대상',     value: ownerLabels[tx.owner] },
                   { icon: 'payment' as const,        label: '결제수단', value:
                       tx.payment_method_type === 'card'    ? (card    ? `💳 ${card.name}`    : '카드') :
                       tx.payment_method_type === 'account' ? (account ? `🏦 ${account.name}` : '통장') :
@@ -294,7 +296,7 @@ export function TransactionDetailSheet({ transaction: tx, visible, onClose }: Pr
                     style={[styles.ownerBtn, owner === o && { backgroundColor: OwnerColors[o], borderColor: OwnerColors[o] }]}
                     onPress={() => setOwner(o)}
                   >
-                    <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>{OwnerLabels[o]}</Text>
+                    <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>{ownerLabels[o]}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

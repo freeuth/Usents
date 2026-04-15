@@ -1,21 +1,23 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Colors, OwnerLabels } from '../../constants/colors';
+import { Colors } from '../../constants/colors';
 import { FilterOwner } from '../../types';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 
 interface FilterBarProps {
   selected: FilterOwner;
   onSelect: (owner: FilterOwner) => void;
 }
 
-const FILTERS: { key: FilterOwner; label: string }[] = [
-  { key: 'all',    label: '전체' },
-  { key: 'me',     label: OwnerLabels.me },
-  { key: 'spouse', label: OwnerLabels.spouse },
-  { key: 'joint',  label: '공동' },
-];
-
 export function FilterBar({ selected, onSelect }: FilterBarProps) {
+  const ownerLabels = useOwnerLabels();
+  const FILTERS: { key: FilterOwner; label: string }[] = [
+    { key: 'all',    label: '전체' },
+    { key: 'me',     label: ownerLabels.me },
+    { key: 'spouse', label: ownerLabels.spouse },
+    { key: 'joint',  label: '공동' },
+  ];
+
   return (
     <View style={styles.container}>
       {FILTERS.map(f => (

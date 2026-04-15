@@ -8,6 +8,7 @@ interface AuthState {
   user: User | null;
   household: Household | null;
   member: Member | null;
+  members: Member[];
   isLoading: boolean;
   isInitialized: boolean;
 
@@ -27,6 +28,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   household: null,
   member: null,
+  members: [],
   isLoading: false,
   isInitialized: false,
 
@@ -76,16 +78,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
+      const myMember: Member = {
+        id: member.id,
+        household_id: member.household_id,
+        user_id: member.user_id,
+        role: member.role,
+        display_name: member.display_name,
+        color: member.color,
+        created_at: member.created_at,
+      };
+
+      // 같은 가구의 모든 멤버 로드
+      const { data: allMembers } = await supabase
+        .from('members')
+        .select('*')
+        .eq('household_id', member.household_id);
+
       set({
-        member: {
-          id: member.id,
-          household_id: member.household_id,
-          user_id: member.user_id,
-          role: member.role,
-          display_name: member.display_name,
-          color: member.color,
-          created_at: member.created_at,
-        },
+        member: myMember,
+        members: allMembers ?? [myMember],
         household: member.households as Household,
       });
     } catch (error) {
@@ -95,7 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signOut: async () => {
     await supabase.auth.signOut();
-    set({ session: null, user: null, household: null, member: null });
+    set({ session: null, user: null, household: null, member: null, members: [] });
   },
 
   updateMember: async (memberId, input) => {

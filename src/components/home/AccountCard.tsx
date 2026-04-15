@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Account, AccountForecast } from '../../types';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
 import { formatCurrency } from '../../lib/helpers';
 import { ACCOUNT_TYPE_LABELS } from '../../constants/categories';
 

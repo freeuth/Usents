@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Owner } from '../../types';
-import { OwnerColors, OwnerLabels } from '../../constants/colors';
+import { OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 
 interface OwnerBadgeProps {
   owner: Owner;
@@ -9,8 +10,9 @@ interface OwnerBadgeProps {
 }
 
 export function OwnerBadge({ owner, size = 'sm' }: OwnerBadgeProps) {
+  const ownerLabels = useOwnerLabels();
   const color = OwnerColors[owner];
-  const label = OwnerLabels[owner];
+  const label = ownerLabels[owner];
 
   return (
     <View style={[

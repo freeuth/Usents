@@ -6,7 +6,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { CardType, Owner } from '../../types';
 import { CARD_TYPE_LABELS } from '../../constants/categories';
 
@@ -15,6 +16,7 @@ const OWNERS: Owner[] = ['me', 'spouse', 'joint'];
 const PAYMENT_DAYS = [1, 5, 7, 10, 12, 14, 15, 17, 20, 25, 27];
 
 export function AddCardScreen({ navigation, route }: any) {
+  const ownerLabels = useOwnerLabels();
   const existing = route?.params?.card;
   const { household } = useAuthStore();
   const { createCard, updateCard, accounts, loadAccounts } = useDataStore();
@@ -169,7 +171,7 @@ export function AddCardScreen({ navigation, route }: any) {
                   onPress={() => setOwner(o)}
                 >
                   <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>
-                    {OwnerLabels[o]}
+                    {ownerLabels[o]}
                   </Text>
                 </TouchableOpacity>
               ))}

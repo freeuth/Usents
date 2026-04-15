@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { useDataStore } from '../../stores/dataStore';
 import { ACCOUNT_TYPE_LABELS } from '../../constants/categories';
 import { formatCurrency } from '../../lib/helpers';
@@ -21,6 +22,7 @@ const ACCOUNT_TYPES: { key: AccountType; label: string }[] = [
 const OWNERS: Owner[] = ['me', 'spouse', 'joint'];
 
 export function AccountDetailScreen({ route, navigation }: any) {
+  const ownerLabels = useOwnerLabels();
   const { accountId } = route.params;
   const { accounts, updateAccount, updateAccountBalance, deleteAccount } = useDataStore();
   const account = accounts.find(a => a.id === accountId);
@@ -121,7 +123,7 @@ export function AccountDetailScreen({ route, navigation }: any) {
             )}
             <View style={[styles.ownerBadge, { backgroundColor: OwnerColors[account.owner] + '20' }]}>
               <Text style={[styles.ownerBadgeText, { color: OwnerColors[account.owner] }]}>
-                {OwnerLabels[account.owner]}
+                {ownerLabels[account.owner]}
               </Text>
             </View>
           </View>
@@ -187,7 +189,7 @@ export function AccountDetailScreen({ route, navigation }: any) {
                     onPress={() => setOwner(o)}
                   >
                     <Text style={[styles.chipText, owner === o && { color: OwnerColors[o] }]}>
-                      {OwnerLabels[o]}
+                      {ownerLabels[o]}
                     </Text>
                   </TouchableOpacity>
                 ))}

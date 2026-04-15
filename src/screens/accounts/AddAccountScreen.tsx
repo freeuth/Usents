@@ -6,7 +6,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { AccountType, Owner } from '../../types';
 import { ACCOUNT_TYPE_LABELS } from '../../constants/categories';
 
@@ -14,6 +15,7 @@ const ACCOUNT_TYPES: AccountType[] = ['checking', 'savings', 'emergency', 'inves
 const OWNERS: Owner[] = ['me', 'spouse', 'joint'];
 
 export function AddAccountScreen({ navigation, route }: any) {
+  const ownerLabels = useOwnerLabels();
   const existing = route?.params?.account;
   const { household } = useAuthStore();
   const { createAccount, updateAccount } = useDataStore();
@@ -149,7 +151,7 @@ export function AddAccountScreen({ navigation, route }: any) {
                   onPress={() => setOwner(o)}
                 >
                   <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>
-                    {OwnerLabels[o]}
+                    {ownerLabels[o]}
                   </Text>
                 </TouchableOpacity>
               ))}

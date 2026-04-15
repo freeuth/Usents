@@ -7,7 +7,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { useDataStore } from '../../stores/dataStore';
 import { useFilterStore } from '../../stores/filterStore';
 import { useAuthStore } from '../../stores/authStore';
@@ -24,6 +25,7 @@ const PAYMENT_TYPES: { key: PaymentMethodType; label: string }[] = [
 ];
 
 export function TransactionDetailScreen({ route, navigation }: any) {
+  const ownerLabels = useOwnerLabels();
   const { transactionId } = route.params;
   const { household } = useAuthStore();
   const { transactions, categories, accounts, cards,
@@ -189,7 +191,7 @@ export function TransactionDetailScreen({ route, navigation }: any) {
                 d => ({ Mon:'월',Tue:'화',Wed:'수',Thu:'목',Fri:'금',Sat:'토',Sun:'일' }[d] ?? d)
               )
             } />
-            <DetailRow icon="person" label="대상" value={OwnerLabels[tx.owner]} isLast={false} />
+            <DetailRow icon="person" label="대상" value={ownerLabels[tx.owner]} isLast={false} />
             <DetailRow icon="payment" label="결제수단" value={
               tx.payment_method_type === 'card'
                 ? (card ? `💳 ${card.name}` : '카드')
@@ -301,7 +303,7 @@ export function TransactionDetailScreen({ route, navigation }: any) {
                 style={[styles.ownerBtn, owner === o && { backgroundColor: OwnerColors[o], borderColor: OwnerColors[o] }]}
                 onPress={() => setOwner(o)}
               >
-                <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>{OwnerLabels[o]}</Text>
+                <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>{ownerLabels[o]}</Text>
               </TouchableOpacity>
             ))}
           </View>

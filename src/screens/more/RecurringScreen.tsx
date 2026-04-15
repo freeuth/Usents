@@ -6,13 +6,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { formatCurrency } from '../../lib/helpers';
 import { RecurringTransaction } from '../../types';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CategoryIcon } from '../../components/common/CategoryIcon';
 
 export function RecurringScreen({ navigation }: any) {
+  const ownerLabels = useOwnerLabels();
   const { household } = useAuthStore();
   const { recurringTransactions, loadRecurring, loadCategories, toggleRecurring } = useDataStore();
 
@@ -56,7 +58,7 @@ export function RecurringScreen({ navigation }: any) {
           </Text>
           <View style={[styles.ownerBadge, { backgroundColor: OwnerColors[item.owner] + '20' }]}>
             <Text style={[styles.ownerText, { color: OwnerColors[item.owner] }]}>
-              {OwnerLabels[item.owner]}
+              {ownerLabels[item.owner]}
             </Text>
           </View>
         </View>

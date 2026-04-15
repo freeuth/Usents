@@ -5,7 +5,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
 import { Owner, PaymentMethodType, RecurringType } from '../../types';
@@ -19,6 +20,7 @@ const PAYMENT_TYPES: { key: PaymentMethodType; label: string }[] = [
 ];
 
 export function AddRecurringScreen({ navigation }: any) {
+  const ownerLabels = useOwnerLabels();
   const { household, member } = useAuthStore();
   const { accounts, cards, categories, loadCategories, loadAccounts, loadCards, createRecurring } = useDataStore();
 
@@ -165,7 +167,7 @@ export function AddRecurringScreen({ navigation }: any) {
                   onPress={() => setOwner(o)}
                 >
                   <Text style={[styles.ownerBtnText, owner === o && { color: '#fff' }]}>
-                    {OwnerLabels[o]}
+                    {ownerLabels[o]}
                   </Text>
                 </TouchableOpacity>
               ))}

@@ -5,12 +5,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Colors, OwnerColors, OwnerLabels } from '../../constants/colors';
+import { Colors, OwnerColors } from '../../constants/colors';
+import { useOwnerLabels } from '../../lib/useOwnerLabels';
 import { useAuthStore } from '../../stores/authStore';
 import { supabase } from '../../lib/supabase';
 import { Member } from '../../types';
 
 export function HouseholdSettingsScreen({ navigation }: any) {
+  const ownerLabels = useOwnerLabels();
   const { household, member, updateHousehold } = useAuthStore();
   const [householdName, setHouseholdName] = useState(household?.name ?? '');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -157,7 +159,7 @@ export function HouseholdSettingsScreen({ navigation }: any) {
                     <Text style={styles.memberName}>{m.display_name}</Text>
                     <View style={[styles.roleBadge, { backgroundColor: OwnerColors[m.role] + '20' }]}>
                       <Text style={[styles.roleText, { color: OwnerColors[m.role] }]}>
-                        {OwnerLabels[m.role]}
+                        {ownerLabels[m.role]}
                       </Text>
                     </View>
                   </View>
