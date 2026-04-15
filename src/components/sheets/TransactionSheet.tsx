@@ -46,7 +46,7 @@ export function TransactionSheet({ visible, onClose, onSuccess }: TransactionShe
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [paymentMethodType, setPaymentMethodType] = useState<PaymentMethodType>('card');
   const [paymentMethodId, setPaymentMethodId]     = useState<string | null>(null);
-  const [owner, setOwner]                         = useState<Owner>('me');
+  const [owner, setOwner]                         = useState<Owner>((member?.role as Owner) ?? 'me');
   const [memo, setMemo]                           = useState('');
   const [isSubmitting, setIsSubmitting]           = useState(false);
 

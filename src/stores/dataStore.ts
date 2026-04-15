@@ -391,7 +391,8 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     for (const r of toGenerate) {
       const txDate = getDayInMonth(yearMonth, r.day_of_month);
-      await supabase.from('transactions').insert({
+      // ignoreDuplicates: 두 폰이 동시에 실행해도 unique constraint로 한 번만 삽입됨
+      const { error } = await supabase.from('transactions').insert({
         household_id: householdId,
         type: r.type,
         amount: r.amount,
@@ -404,7 +405,13 @@ export const useDataStore = create<DataState>((set, get) => ({
         is_recurring: true,
         recurring_id: r.id,
         created_by: null,
-      });
+      }, { count: 'exact' });
+
+      // 23505 = unique_violation → 이미 다른 기기에서 생성됨, 무시
+      if (error && error.code !== '23505') {
+        console.warn('generateMonthlyRecurring insert error:', error.message);
+        continue;
+      }
 
       await supabase
         .from('recurring_transactions')
