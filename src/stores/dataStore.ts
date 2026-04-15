@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import {
   Account, Card, Category, Transaction, RecurringTransaction,
   TransactionInput, AccountInput, CardInput, RecurringInput,
@@ -17,6 +18,8 @@ export interface CategoryInput {
 import { getMonthStart, getMonthEnd, getDayInMonth, formatYearMonth } from '../lib/helpers';
 import { format } from 'date-fns';
 
+let realtimeChannel: RealtimeChannel | null = null;
+
 interface DataState {
   accounts: Account[];
   cards: Card[];
@@ -24,6 +27,7 @@ interface DataState {
   transactions: Transaction[];
   recurringTransactions: RecurringTransaction[];
   isLoading: boolean;
+  loadedYearMonth: string | null;
 
   // Loaders
   loadAccounts: (householdId: string) => Promise<void>;
@@ -31,6 +35,10 @@ interface DataState {
   loadCategories: (householdId: string) => Promise<void>;
   loadTransactions: (householdId: string, yearMonth: string, owner?: FilterOwner) => Promise<void>;
   loadRecurring: (householdId: string) => Promise<void>;
+
+  // Realtime
+  subscribeRealtime: (householdId: string) => void;
+  unsubscribeRealtime: () => void;
 
   // CRUD - Transactions
   createTransaction: (householdId: string, memberId: string, input: TransactionInput) => Promise<void>;
@@ -76,6 +84,7 @@ export const useDataStore = create<DataState>((set, get) => ({
   transactions: [],
   recurringTransactions: [],
   isLoading: false,
+  loadedYearMonth: null,
 
   loadAccounts: async (householdId) => {
     const { data } = await supabase
@@ -133,7 +142,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         : null,
     }));
 
-    set({ transactions: enriched });
+    set({ transactions: enriched, loadedYearMonth: yearMonth });
   },
 
   loadRecurring: async (householdId) => {
@@ -523,5 +532,124 @@ export const useDataStore = create<DataState>((set, get) => ({
       income: txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0),
       expense: txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0),
     };
+  },
+
+  subscribeRealtime: (householdId) => {
+    get().unsubscribeRealtime();
+
+    const channel = supabase
+      .channel(`household:${householdId}`)
+
+      // ── Transactions ──────────────────────────────────────
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'transactions',
+        filter: `household_id=eq.${householdId}`,
+      }, async (payload) => {
+        if (payload.eventType === 'DELETE') {
+          set(s => ({ transactions: s.transactions.filter(t => t.id !== (payload.old as any).id) }));
+          return;
+        }
+
+        const txId = (payload.new as any).id;
+        const txDate: string = (payload.new as any).date ?? '';
+
+        // 현재 로드된 월 범위 밖이면 무시
+        const { loadedYearMonth } = get();
+        if (loadedYearMonth) {
+          const start = getMonthStart(loadedYearMonth);
+          const end = getMonthEnd(loadedYearMonth);
+          if (txDate < start || txDate > end) return;
+        }
+
+        const { data } = await supabase
+          .from('transactions')
+          .select('*, category:categories(*)')
+          .eq('id', txId)
+          .single();
+
+        if (!data) return;
+
+        const { cards, accounts } = get();
+        const enriched = {
+          ...data,
+          card: data.payment_method_type === 'card'
+            ? (cards.find(c => c.id === data.payment_method_id) ?? null)
+            : null,
+          account: data.payment_method_type === 'account'
+            ? (accounts.find(a => a.id === data.payment_method_id) ?? null)
+            : null,
+        };
+
+        if (payload.eventType === 'INSERT') {
+          set(s => ({ transactions: [enriched, ...s.transactions] }));
+        } else {
+          set(s => ({ transactions: s.transactions.map(t => t.id === txId ? enriched : t) }));
+        }
+      })
+
+      // ── Accounts ──────────────────────────────────────────
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'accounts',
+        filter: `household_id=eq.${householdId}`,
+      }, async (payload) => {
+        if (payload.eventType === 'DELETE') {
+          set(s => ({ accounts: s.accounts.filter(a => a.id !== (payload.old as any).id) }));
+          return;
+        }
+
+        const { data } = await supabase
+          .from('accounts')
+          .select('*')
+          .eq('id', (payload.new as any).id)
+          .single();
+
+        if (!data) return;
+
+        if (!data.is_active) {
+          set(s => ({ accounts: s.accounts.filter(a => a.id !== data.id) }));
+        } else if (payload.eventType === 'INSERT') {
+          set(s => ({ accounts: [...s.accounts, data] }));
+        } else {
+          set(s => ({ accounts: s.accounts.map(a => a.id === data.id ? data : a) }));
+        }
+      })
+
+      // ── Cards ─────────────────────────────────────────────
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'cards',
+        filter: `household_id=eq.${householdId}`,
+      }, async (payload) => {
+        if (payload.eventType === 'DELETE') {
+          set(s => ({ cards: s.cards.filter(c => c.id !== (payload.old as any).id) }));
+          return;
+        }
+
+        const { data } = await supabase
+          .from('cards')
+          .select('*, linked_account:accounts(*)')
+          .eq('id', (payload.new as any).id)
+          .single();
+
+        if (!data) return;
+
+        if (!data.is_active) {
+          set(s => ({ cards: s.cards.filter(c => c.id !== data.id) }));
+        } else if (payload.eventType === 'INSERT') {
+          set(s => ({ cards: [...s.cards, data] }));
+        } else {
+          set(s => ({ cards: s.cards.map(c => c.id === data.id ? data : c) }));
+        }
+      })
+
+      .subscribe();
+
+    realtimeChannel = channel;
+  },
+
+  unsubscribeRealtime: () => {
+    if (realtimeChannel) {
+      supabase.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
   },
 }));

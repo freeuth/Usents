@@ -6,6 +6,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'rea
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAuthStore } from '../stores/authStore';
+import { useDataStore } from '../stores/dataStore';
 import { supabase } from '../lib/supabase';
 import { Colors } from '../constants/colors';
 
@@ -161,6 +162,7 @@ function AppStack() {
 
 export function AppNavigator() {
   const { session, household, isLoading, isInitialized, initialize, setSession } = useAuthStore();
+  const { subscribeRealtime, unsubscribeRealtime } = useDataStore();
 
   useEffect(() => {
     initialize();
@@ -169,11 +171,22 @@ export function AppNavigator() {
       setSession(session);
       if (session?.user) {
         useAuthStore.getState().loadHousehold(session.user.id);
+      } else {
+        unsubscribeRealtime();
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (household?.id) {
+      subscribeRealtime(household.id);
+    }
+    return () => {
+      if (!household?.id) unsubscribeRealtime();
+    };
+  }, [household?.id]);
 
   if (!isInitialized) {
     return (
